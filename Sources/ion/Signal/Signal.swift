@@ -9,8 +9,8 @@ protocol SignalDelegate: AnyObject {
 
 protocol Signal {
     var delegate: SignalDelegate { get set }
-    
-    func join()
+
+    func join(session: String)
     func offer()
     func answer()
     func trickle()
