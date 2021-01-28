@@ -1,7 +1,7 @@
 import XCTest
 
-import ion_sdk_swiftTests
+import ionTests
 
 var tests = [XCTestCaseEntry]()
-tests += ion_sdk_swiftTests.allTests()
+tests += ionTests.allTests()
 XCTMain(tests)

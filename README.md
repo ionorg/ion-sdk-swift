@@ -1,3 +1,3 @@
-# ion-sdk-swift
+# ion
 
 A description of this package.
