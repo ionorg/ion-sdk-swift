@@ -1,0 +1,6 @@
+framework module Pods_ion {
+  umbrella header "Pods-ion-umbrella.h"
+
+  export *
+  module * { export * }
+}
