@@ -4,4 +4,4 @@
 /*.xc*
 xcuserdata/
 .swiftpm
-Pods/
+Pods/*
