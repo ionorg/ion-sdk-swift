@@ -1,5 +1,5 @@
-import XCTest
 @testable import ion_sdk_swift
+import XCTest
 
 final class ion_sdk_swiftTests: XCTestCase {
     func testExample() {
