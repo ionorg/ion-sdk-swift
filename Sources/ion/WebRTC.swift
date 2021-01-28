@@ -15,7 +15,7 @@ protocol WebRTCClientDelegate: AnyObject {
 }
 
 final class WebRTCClient: NSObject {
-    let role: Trickle.Target
+    let role: Role
 
     // The `RTCPeerConnectionFactory` is in charge of creating new RTCPeerConnection instances.
     // A new RTCPeerConnection should be created every new call, but the factory is shared.
@@ -41,7 +41,7 @@ final class WebRTCClient: NSObject {
         fatalError("WebRTCClient:init is unavailable")
     }
 
-    required init(role: Trickle.Target, iceServers: [RTCIceServer]) {
+    required init(role: Role, iceServers: [RTCIceServer]) {
         self.role = role
 
         let config = RTCConfiguration()
@@ -80,48 +80,58 @@ final class WebRTCClient: NSObject {
         }
     }
 
-    func offer(completion: @escaping (_ sdp: RTCSessionDescription) -> Void) {
+    func offer(completion: @escaping (Result<RTCSessionDescription, Error>) -> Void) {
         let constrains = RTCMediaConstraints(mandatoryConstraints: mediaConstrains, optionalConstraints: nil)
-        peerConnection.offer(for: constrains) { sdp, _ in
-            guard let sdp = sdp else {
-                return
+        peerConnection.offer(for: constrains, completionHandler: { sdp, error in
+            if let error = error {
+                return completion(.failure(error))
             }
 
-            self.peerConnection.setLocalDescription(sdp, completionHandler: { _ in
-                completion(sdp)
-            })
-        }
-    }
-
-    func answer(completion: @escaping (_ sdp: RTCSessionDescription) -> Void) {
-        let constrains = RTCMediaConstraints(mandatoryConstraints: mediaConstrains, optionalConstraints: nil)
-        peerConnection.answer(for: constrains) { sdp, _ in
-            guard let sdp = sdp else {
-                return
+            if let sdp = sdp {
+                return completion(.success(sdp))
             }
 
-            self.peerConnection.setLocalDescription(sdp, completionHandler: { _ in
-                completion(sdp)
-            })
-        }
+            fatalError("both SDP and Error were nil")
+        })
     }
 
-    func set(remoteSdp: RTCSessionDescription, completion: @escaping (Error?) -> Void) {
-        peerConnection.setRemoteDescription(remoteSdp, completionHandler: completion)
+    func answer(completion: @escaping (Result<RTCSessionDescription, Error>) -> Void) {
+        let constrains = RTCMediaConstraints(mandatoryConstraints: mediaConstrains, optionalConstraints: nil)
+        peerConnection.answer(for: constrains, completionHandler: { sdp, error in
+            if let error = error {
+                return completion(.failure(error))
+            }
+
+            if let sdp = sdp {
+                return completion(.success(sdp))
+            }
+
+            fatalError("both SDP and Error were nil")
+        })
+    }
+
+    func set(remoteSdp: RTCSessionDescription, completion: @escaping (Result<Void, Error>) -> Void) {
+        peerConnection.setRemoteDescription(remoteSdp, completionHandler: { error in
+            if let error = error {
+                return completion(.failure(error))
+            }
+
+            return completion(.success(()))
+        })
     }
 
     func set(remoteCandidate: RTCIceCandidate) {
         peerConnection.add(remoteCandidate)
     }
 
-    func set(localDescription description: RTCSessionDescription, completion: @escaping (Error?) -> Void) {
-        peerConnection.setLocalDescription(description, completionHandler: completion)
-    }
+    func set(localDescription description: RTCSessionDescription, completion: @escaping (Result<Void, Error>) -> Void) {
+        peerConnection.setLocalDescription(description, completionHandler: { error in
+            if let error = error {
+                return completion(.failure(error))
+            }
 
-    private func createAudioTrack() -> RTCAudioTrack {
-        let audioConstrains = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
-        let audioSource = WebRTCClient.factory.audioSource(with: audioConstrains)
-        return WebRTCClient.factory.audioTrack(with: audioSource, trackId: "audio")
+            return completion(.success(()))
+        })
     }
 
     func createAudioTrack(label: String, streamId: String) -> RTCAudioTrack {
