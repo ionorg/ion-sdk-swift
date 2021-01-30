@@ -1,4 +1,5 @@
 import Foundation
+import WebRTC // @TODO MAYBE WE ABSTRACT THIS AWAY
 
 class Client {
     /// The signalling client used to establish and maintain connections.
@@ -34,7 +35,27 @@ class Client {
 }
 
 extension Client: SignalDelegate {
-    func signal(_: Signal, didReceiveTrickle _: Trickle) {}
+    func signal(_: Signal, didReceiveTrickle trickle: Trickle) {
+        guard let target = transports[trickle.target] else {
+            return
+        }
+
+        target.set(remoteCandidate: RTCIceCandidate(
+            sdp: trickle.candidate.candidate,
+            sdpMLineIndex: Int32(trickle.candidate.sdpMLineIndex),
+            sdpMid: nil
+        ))
+    }
 
     func signal(_: Signal, didReceiveDescription _: SessionDescription) {}
+}
+
+extension Client: WebRTCClientDelegate {
+    func webRTCClient(_: WebRTCClient, didDiscoverLocalCandidate _: RTCIceCandidate) {}
+
+    func webRTCClient(_: WebRTCClient, didChangeConnectionState _: RTCIceConnectionState) {}
+
+    func webRTCClient(_: WebRTCClient, didReceiveData _: Data, onChannel _: String) {}
+
+    func webRTCClientShouldNegotiate(_: WebRTCClient) {}
 }
