@@ -87,11 +87,19 @@ final class WebRTCClient: NSObject {
                 return completion(.failure(error))
             }
 
-            if let sdp = sdp {
-                return completion(.success(sdp))
+            guard let sdp = sdp else {
+//                return completion(.failure()) // @TODO
+                return
             }
 
-            fatalError("both SDP and Error were nil")
+            self.set(localDescription: sdp, completion: { result in
+                switch result {
+                case .success:
+                    return completion(.success(sdp))
+                case let .failure(error):
+                    return completion(.failure(error))
+                }
+            })
         })
     }
 
