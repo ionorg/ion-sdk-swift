@@ -113,6 +113,8 @@ final class WebRTCClient: NSObject {
             if let sdp = sdp {
                 return completion(.success(sdp))
             }
+            
+            // @TODO SET REMOTE
 
             fatalError("both SDP and Error were nil")
         })
