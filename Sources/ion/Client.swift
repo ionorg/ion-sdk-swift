@@ -8,12 +8,17 @@ class Client {
     /// The publisher and subscriber WebRTC transports.
     private(set) var transports = [Role: WebRTCClient]()
 
+    /// The ICE servers used for WebRTC.
+    private var iceServers: [RTCIceServer]
+
     /// Creates a new `ion` client.
     ///
     /// - Parameters:
     ///     - signal: The signalling client.
-    init(signal: Signal) {
+    ///     - iceServers: The WebRTC ICE servers.
+    init(signal: Signal, iceServers: [RTCIceServer]) {
         self.signal = signal
+        self.iceServers = iceServers
         self.signal.delegate = self
     }
 
@@ -21,7 +26,27 @@ class Client {
     ///
     /// - Parameters:
     ///     - session: The id of the session.
-    func join(session _: String) {}
+    func join(session _: String) {
+        let publisher = WebRTCClient(role: .publisher, iceServers: iceServers)
+
+        transports[.publisher] = publisher
+        transports[.subscriber] = WebRTCClient(role: .subscriber, iceServers: iceServers)
+
+        transports.forEach { _, stream in
+            stream.delegate = self
+        }
+
+//        _ = publisher.createAudioTrack(label: "audio", streamId: "stream")
+
+        publisher.offer(completion: { result in
+            switch result {
+            case .failure:
+                break
+            case let .success(description):
+                break
+            }
+        })
+    }
 
     /// Closes the connection.
     func close() {
