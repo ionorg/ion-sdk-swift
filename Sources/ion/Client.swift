@@ -43,7 +43,16 @@ class Client {
             case .failure:
                 break
             case let .success(description):
-                break
+
+                // @TODO PROBABLY PUT INTO WEBRTC.
+                publisher.set(localDescription: description, completion: { result in
+                    switch result {
+                    case .failure:
+                        break
+                    case .success:
+                        return
+                    }
+                })
             }
         })
     }
