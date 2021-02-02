@@ -17,8 +17,6 @@ protocol WebRTCClientDelegate: AnyObject {
 final class WebRTCClient: NSObject {
     let role: Role
 
-    // The `RTCPeerConnectionFactory` is in charge of creating new RTCPeerConnection instances.
-    // A new RTCPeerConnection should be created every new call, but the factory is shared.
     private static let factory: RTCPeerConnectionFactory = {
         RTCInitializeSSL()
         return RTCPeerConnectionFactory()
@@ -150,7 +148,9 @@ final class WebRTCClient: NSObject {
 
         let track = WebRTCClient.factory.audioTrack(with: audioSource, trackId: label)
 
+        // @TODO FIGURE THIS PART OUT
         peerConnection.add(track, streamIds: [streamId])
+        peerConnection.addTransceiver(with: track)
 
         return track
     }
