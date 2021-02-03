@@ -36,14 +36,13 @@ class Client {
             stream.delegate = self
         }
 
-//        _ = publisher.createAudioTrack(label: "audio", streamId: "stream")
-
         publisher.offer(completion: { result in
             switch result {
             case .failure:
-                break
-            case let .success(description):
                 break // @TODO
+            case let .success(description):
+                debugPrint(description)
+//                self.signal.offer(description)
             }
         })
     }

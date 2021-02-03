@@ -108,13 +108,13 @@ final class WebRTCClient: NSObject {
                 return completion(.failure(error))
             }
 
-            if let sdp = sdp {
-                return completion(.success(sdp))
-            }
-            
-            // @TODO SET REMOTE
+            peerConnection.setRemoteDescription(sdp, completionHandler: { error in
+                if let error = error {
+                    return completion(.failure(error))
+                }
 
-            fatalError("both SDP and Error were nil")
+                return completion(.success(sdp))
+            })
         })
     }
 
@@ -148,7 +148,6 @@ final class WebRTCClient: NSObject {
 
         let track = WebRTCClient.factory.audioTrack(with: audioSource, trackId: label)
 
-        // @TODO FIGURE THIS PART OUT
         peerConnection.add(track, streamIds: [streamId])
         peerConnection.addTransceiver(with: track)
 
