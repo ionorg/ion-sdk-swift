@@ -148,7 +148,6 @@ final class WebRTCClient: NSObject {
 
         let track = WebRTCClient.factory.audioTrack(with: audioSource, trackId: label)
 
-        peerConnection.add(track, streamIds: [streamId])
         peerConnection.addTransceiver(with: track)
 
         return track
